@@ -1,0 +1,79 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using NodaTime;
+using NodaTime.Serialization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using NodaTime.Serialization.JsonNet;
+using PocNg1Noda.Repositories;
+
+namespace PocNg1Noda
+{
+    public class Startup
+    {
+        public Startup(IHostingEnvironment env)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            if (env.IsEnvironment("Development"))
+            {
+                // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
+                builder.AddApplicationInsightsSettings(developerMode: true);
+            }
+
+            builder.AddEnvironmentVariables();
+            Configuration = builder.Build();
+        }
+
+        public IConfigurationRoot Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // Add framework services.
+            services.AddApplicationInsightsTelemetry(Configuration);
+
+            services
+            .AddMvc()
+            .AddJsonOptions(opt =>
+            {
+                // adding converter for ZonedDateTime because that's what this POC is about
+                // there used to be a way (still is?) to use Noda Time's ConfigureNodaTime 
+                // JsonSerializerSettings extension method
+                // TODO(jesse): figure out how to configure Noda Time more simply
+                var zdtJsonConverter = NodaConverters.CreateZonedDateTimeConverter(DateTimeZoneProviders.Tzdb);
+                opt.SerializerSettings.Converters.Add(zdtJsonConverter);
+            });
+
+            services.AddTransient<IZdtRepository, ZdtRepository>();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
+
+            // serves up index.html from wwwroot by default
+            app.UseDefaultFiles();
+            // since we specified app.UseDefaultFiles, we need to specify this to serve files from wwwroot
+            app.UseStaticFiles();
+
+            app.UseApplicationInsightsRequestTelemetry();
+
+            app.UseApplicationInsightsExceptionTelemetry();
+
+            app.UseMvc();
+        }
+    }
+}

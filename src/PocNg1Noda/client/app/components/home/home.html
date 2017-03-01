@@ -1,0 +1,42 @@
+<div class="container-fluid">
+  <h1>{{$ctrl.datePickers.length}} Time Zone local datepickers!</h1>
+  <div>(resets after 100)</div>
+  <div class="row">
+    <div class="col-xs-12">
+      <select ng-model="$ctrl.timeZone"
+              ng-options="tz as tz for tz in $ctrl.timeZones">
+        <option value="">Select a time zone</option>
+      </select>
+      <button class="btn btn-primary"
+              ng-disabled="!$ctrl.timeZone"
+              ng-click="$ctrl.addDatePicker($ctrl.timeZone)">
+        Add Date Picker
+      </button>
+    </div>
+  </div>
+  <div ng-repeat="dp in $ctrl.datePickers track by dp.id">
+    <hr/>
+    <div class="row">
+      <div class="col-md-6">
+        <datetimepicker data-ng-model="dp.zonedDateTime"
+                        on-set-time="$ctrl.updateDatePicker($index)">
+        </datetimepicker>
+      </div>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-xs-12">
+            <label>JSON</label>
+            <pre>{{dp.zonedDateTime | json}}</pre>
+            <label>ISO String</label>
+            <pre>{{dp.zonedDateTime.toISOString()}}</pre>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <button class="btn btn-danger" ng-click="$ctrl.removeDatePicker(dp.id)">Remove Date Picker</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
