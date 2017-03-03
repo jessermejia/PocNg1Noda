@@ -9,7 +9,7 @@
     "xunit": "2.2.0-beta5-build3474"
   },
     "frameworks": {
-        "netcoreapp1.0": {
+        "netcoreapp1.1": {
             "dependencies": {
                 "Microsoft.NETCore.App": {
                     "type": "platform",
