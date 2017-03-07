@@ -7,6 +7,9 @@ A proof of concept web application to demonstrate a way to approach handling dat
 ## Why
 I want to share an end to end (database <--> browser) approach to solving this problem (and perhaps learn something along the way).
 
+## Where
+[Live Demo](https://pocng1noda.jessermejia.com)
+
 ## Frameworks / libraries / components
 1.	.NET Core
 2.	NodaTime
